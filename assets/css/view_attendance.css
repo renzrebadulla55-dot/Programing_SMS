@@ -1,0 +1,170 @@
+/* General Styles */
+.container {
+    margin-bottom: 25px;
+}
+
+.card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.card h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.card p {
+    color: var(--text-muted);
+}
+
+.card hr {
+    border: 0;
+    border-top: 1px solid #eee;
+    margin: 20px 0;
+}
+
+.success-box {
+    background: #d1fae5;
+    color: #065f46;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.error-box {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+/* Filter Form */
+.no-print form {
+    display: flex;
+    gap: 15px;
+    align-items: flex-end;
+}
+
+.no-print form label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.no-print form input[type="text"],
+.no-print form input[type="date"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+}
+
+.no-print form input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.no-print form .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: 0.2s;
+    text-decoration: none;
+}
+
+.no-print form .btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.no-print form .btn-primary:hover {
+    background: var(--primary-hover);
+}
+
+.no-print form .btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.no-print form .btn-secondary:hover {
+    background: #e5e7eb;
+}
+
+/* Summary Cards */
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.summary-card {
+    padding: 15px;
+    background: #f8fafc;
+    border-radius: 4px;
+}
+
+.summary-card small {
+    color: #64748b;
+    font-weight: bold;
+}
+
+.summary-card .value {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.summary-card.total {
+    border-left: 4px solid #3b82f6;
+}
+
+.summary-card.present {
+    border-left: 4px solid var(--success);
+    color: var(--success);
+}
+
+.summary-card.absent {
+    border-left: 4px solid var(--danger);
+    color: var(--danger);
+}
+
+.summary-card.late-excused {
+    border-left: 4px solid #f59e0b;
+    color: #f59e0b;
+}
+
+/* Table Styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th {
+    text-align: left;
+    padding: 12px;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    border-bottom: 2px solid #f3f4f6;
+}
+
+td {
+    padding: 16px 12px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+tr:hover {
+    background-color: #f9fafb;
+}
+
+td strong {
+    font-weight: bold;
+}

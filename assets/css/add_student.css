@@ -1,0 +1,128 @@
+/* Add Student Page Specific Styles */
+.card h2 {
+    margin-bottom: 10px;
+}
+
+.card p {
+    color: var(--text-muted);
+}
+
+.card hr {
+    border: 0;
+    border-top: 1px solid #eee;
+    margin: 20px 0;
+}
+
+.success-box {
+    background: #d1fae5;
+    color: #065f46;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.error-box {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-group label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 1rem;
+    margin-top: 5px;
+    outline: none;
+}
+
+.form-group input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.form-actions {
+    margin-top: 20px;
+}
+
+.form-actions .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: 0.2s;
+    display: inline-block;
+    text-decoration: none;
+}
+
+.form-actions .btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.form-actions .btn-primary:hover {
+    background: var(--primary-hover);
+}
+
+.form-actions .btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+    margin-left: 10px;
+}
+
+.card-student-list {
+    margin-top: 30px;
+}
+
+.card-student-list h3 {
+    margin-bottom: 15px;
+}
+
+.card-student-list table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.card-student-list th {
+    text-align: left;
+    padding: 12px;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    border-bottom: 2px solid #f3f4f6;
+}
+
+.card-student-list td {
+    padding: 16px 12px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.card-student-list a {
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.card-student-list a.edit {
+    color: var(--primary);
+}
+
+.card-student-list a.delete {
+    color: var(--danger);
+    margin-left: 15px;
+}
