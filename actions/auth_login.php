@@ -3,29 +3,31 @@ session_start();
 require_once '../config/database.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $user = trim($_POST['username']); 
-    $pass = trim($_POST['password']);
+    $username = $_POST['username'];
+    $password = $_POST['password'];
 
-    $stmt = $conn->prepare("SELECT * FROM users WHERE username = ?");
-    $stmt->execute([$user]);
-    $account = $stmt->fetch(PDO::FETCH_ASSOC);
+    try {
+        $stmt = $conn->prepare("SELECT * FROM users WHERE username = ?");
+        $stmt->execute([$username]);
+        $user = $stmt->fetch();
 
-    if ($account) {
-        // User found, now checking password
-        if (password_verify($pass, $account['password'])) {
-            $_SESSION['user_id'] = $account['id'];
-            $_SESSION['username'] = $account['username'];
+        if ($user && password_verify($password, $user['password'])) {
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['role'] = isset($user['role']) ? $user['role'] : 'admin';
+            $_SESSION['just_logged_in'] = true;
+            
+            // Log the login action
+            log_system_action($conn, "Logged in to the system", $user['username']);
+            
             header("Location: ../pages/dashboard.php");
             exit();
         } else {
-            // Password wrong - send back to login
             header("Location: ../pages/login.php?error=1");
             exit();
         }
-    } else {
-        // Username not found - send back to login
-        header("Location: ../pages/login.php?error=1");
-        exit();
+    } catch(PDOException $e) {
+        die("Login failed: " . $e->getMessage());
     }
 }
 ?>

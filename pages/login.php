@@ -203,8 +203,35 @@ if ($hour >= 0 && $hour < 12) {
             border: 1px solid #FCA5A5;
         }
     </style>
+    <!-- Prevent Back/Forward caching issues -->
+    <script>
+        // Force reload if loaded from browser cache (bfcache bypass prevention)
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        });
+        
+        // Push state so pressing back/forward stays on login (prevents going back to secure pages visually)
+        history.pushState(null, null, location.href);
+        window.addEventListener('popstate', function () {
+            history.pushState(null, null, location.href);
+        });
+    </script>
 </head>
 <body>
+
+    <!-- Blurred Background Overlay -->
+    <div class="login-bg-overlay"></div>
+
+    <?php if(isset($_GET['logout'])): ?>
+    <div id="logout-banner" style="position: fixed; top: 30px; left: 50%; transform: translateX(-50%); z-index: 9999; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); color: #EF4444; padding: 15px 30px; border-radius: 50px; font-weight: 700; box-shadow: 0 10px 25px rgba(239,68,68,0.2); border: 1px solid #FCA5A5; animation: slideDown 0.5s ease forwards;">
+        🔒 You have been securely logged out. PLEASE LOG IN AGAIN to access the system.
+    </div>
+    <style>
+        @keyframes slideDown { from { top: -50px; opacity: 0; } to { top: 30px; opacity: 1; } }
+    </style>
+    <?php endif; ?>
 
     <div class="bg-image"></div>
     <div class="bg-overlay"></div>

@@ -4,53 +4,85 @@ require_once '../config/database.php';
 include '../includes/header.php'; 
 
 $today = date('Y-m-d');
+$role = $_SESSION['role'] ?? 'admin';
+$user_id = $_SESSION['user_id'];
 
-// Total Students
-$count_students = $conn->query("SELECT COUNT(*) FROM students")->fetchColumn();
+// Determine Greeting based on PH Time
+date_default_timezone_set('Asia/Manila');
+$hour = date('H');
+if ($hour < 12) $greeting = "Good Morning";
+elseif ($hour < 18) $greeting = "Good Afternoon";
+else $greeting = "Good Evening";
 
-// Present Today
-$present_today = $conn->query("SELECT COUNT(DISTINCT student_id) FROM attendance WHERE attendance_date = '$today' AND status = 'Present'")->fetchColumn();
-
-// Late Today
-$late_today = $conn->query("SELECT COUNT(DISTINCT student_id) FROM attendance WHERE attendance_date = '$today' AND status = 'Late'")->fetchColumn();
-
-// Absent Today
-$absent_today = $conn->query("SELECT COUNT(DISTINCT student_id) FROM attendance WHERE attendance_date = '$today' AND status = 'Absent'")->fetchColumn();
-
-// Graph data: last 7 days
-$dates = [];
-for ($i = 6; $i >= 0; $i--) {
-    $dates[] = date('Y-m-d', strtotime("-$i days"));
+$show_banner = false;
+if (isset($_SESSION['just_logged_in']) && $_SESSION['just_logged_in']) {
+    $show_banner = true;
+    unset($_SESSION['just_logged_in']);
 }
 
-$labels = [];
-$present_counts = [];
-$late_counts    = [];
-$absent_counts  = [];
+if ($role === 'admin') {
+    // ADMIN DASHBOARD
+    $count_students = $conn->query("SELECT COUNT(*) FROM students")->fetchColumn();
+    $present_today = $conn->query("SELECT COUNT(DISTINCT student_id) FROM attendance WHERE attendance_date = '$today' AND status = 'Present'")->fetchColumn();
+    $late_today = $conn->query("SELECT COUNT(DISTINCT student_id) FROM attendance WHERE attendance_date = '$today' AND status = 'Late'")->fetchColumn();
+    $absent_today = $conn->query("SELECT COUNT(DISTINCT student_id) FROM attendance WHERE attendance_date = '$today' AND status = 'Absent'")->fetchColumn();
+    
+    // Graph
+    $dates = []; for ($i = 6; $i >= 0; $i--) $dates[] = date('Y-m-d', strtotime("-$i days"));
+    $labels = []; $present_counts = []; $late_counts = []; $absent_counts = [];
+    foreach ($dates as $date) {
+        $labels[] = date('M d', strtotime($date));
+        $present_counts[] = (int)$conn->query("SELECT COUNT(*) FROM attendance WHERE attendance_date = '$date' AND status = 'Present'")->fetchColumn();
+        $late_counts[] = (int)$conn->query("SELECT COUNT(*) FROM attendance WHERE attendance_date = '$date' AND status = 'Late'")->fetchColumn();
+        $absent_counts[] = (int)$conn->query("SELECT COUNT(*) FROM attendance WHERE attendance_date = '$date' AND status = 'Absent'")->fetchColumn();
+    }
+    
+    $recent_stmt = $conn->query("SELECT s.first_name, s.last_name, a.status, a.attendance_date, sub.subject_name FROM attendance a JOIN students s ON a.student_id = s.id LEFT JOIN subjects sub ON a.subject_id = sub.id ORDER BY a.id DESC LIMIT 5");
+} else {
+    // PROFESSOR DASHBOARD
+    // Get their subjects
+    $sub_stmt = $conn->prepare("SELECT id FROM subjects WHERE professor_id = ?");
+    $sub_stmt->execute([$user_id]);
+    $my_subjects = $sub_stmt->fetchAll(PDO::FETCH_COLUMN);
+    $sub_in = implode(',', empty($my_subjects) ? [0] : $my_subjects);
 
-foreach ($dates as $date) {
-    $labels[] = date('M d', strtotime($date));
-    $p = $conn->prepare("SELECT COUNT(*) FROM attendance WHERE attendance_date = ? AND status = 'Present'");
-    $p->execute([$date]); $present_counts[] = (int)$p->fetchColumn();
-    $l = $conn->prepare("SELECT COUNT(*) FROM attendance WHERE attendance_date = ? AND status = 'Late'");
-    $l->execute([$date]); $late_counts[] = (int)$l->fetchColumn();
-    $a = $conn->prepare("SELECT COUNT(*) FROM attendance WHERE attendance_date = ? AND status = 'Absent'");
-    $a->execute([$date]); $absent_counts[] = (int)$a->fetchColumn();
+    // Total Students across their subjects (distinct by year_level)
+    $count_students = $conn->query("SELECT COUNT(DISTINCT s.id) FROM students s JOIN subjects sub ON s.year_level = sub.year_level WHERE sub.id IN ($sub_in)")->fetchColumn();
+    $present_today = $conn->query("SELECT COUNT(DISTINCT student_id) FROM attendance WHERE attendance_date = '$today' AND status = 'Present' AND subject_id IN ($sub_in)")->fetchColumn();
+    $late_today = $conn->query("SELECT COUNT(DISTINCT student_id) FROM attendance WHERE attendance_date = '$today' AND status = 'Late' AND subject_id IN ($sub_in)")->fetchColumn();
+    $absent_today = $conn->query("SELECT COUNT(DISTINCT student_id) FROM attendance WHERE attendance_date = '$today' AND status = 'Absent' AND subject_id IN ($sub_in)")->fetchColumn();
+    
+    $dates = []; for ($i = 6; $i >= 0; $i--) $dates[] = date('Y-m-d', strtotime("-$i days"));
+    $labels = []; $present_counts = []; $late_counts = []; $absent_counts = [];
+    foreach ($dates as $date) {
+        $labels[] = date('M d', strtotime($date));
+        $present_counts[] = (int)$conn->query("SELECT COUNT(*) FROM attendance WHERE attendance_date = '$date' AND status = 'Present' AND subject_id IN ($sub_in)")->fetchColumn();
+        $late_counts[] = (int)$conn->query("SELECT COUNT(*) FROM attendance WHERE attendance_date = '$date' AND status = 'Late' AND subject_id IN ($sub_in)")->fetchColumn();
+        $absent_counts[] = (int)$conn->query("SELECT COUNT(*) FROM attendance WHERE attendance_date = '$date' AND status = 'Absent' AND subject_id IN ($sub_in)")->fetchColumn();
+    }
+    
+    $recent_stmt = $conn->query("SELECT s.first_name, s.last_name, a.status, a.attendance_date, sub.subject_name FROM attendance a JOIN students s ON a.student_id = s.id JOIN subjects sub ON a.subject_id = sub.id WHERE sub.id IN ($sub_in) ORDER BY a.id DESC LIMIT 5");
 }
 
-// Recent attendance records (last 5)
-$recent_stmt = $conn->query("SELECT s.first_name, s.last_name, s.section, a.status, a.attendance_date
-    FROM attendance a JOIN students s ON a.student_id = s.id
-    ORDER BY a.attendance_date DESC, a.id DESC LIMIT 5");
 $recent = $recent_stmt->fetchAll(PDO::FETCH_ASSOC);
-
 ?>
 
-<div class="container">
+<div class="container" style="position: relative;">
+
+    <!-- Welcome Login Banner -->
+    <?php if($show_banner): ?>
+    <div id="welcome-banner" style="position: fixed; top: 30px; left: 50%; transform: translateX(-50%); z-index: 9999; background: #10B981; color: white; padding: 15px 30px; border-radius: 50px; font-weight: 700; box-shadow: 0 10px 25px rgba(16,185,129,0.3); animation: slideDown 0.5s ease forwards, slideUp 0.5s ease 4s forwards;">
+        👋 <?php echo $greeting . ", " . ucfirst($role); ?>! Login success.
+    </div>
+    <style>
+        @keyframes slideDown { from { top: -50px; opacity: 0; } to { top: 30px; opacity: 1; } }
+        @keyframes slideUp { from { top: 30px; opacity: 1; } to { top: -50px; opacity: 0; visibility: hidden; } }
+    </style>
+    <?php endif; ?>
 
     <!-- Page Header -->
     <div class="dash-header">
-        <h2 class="page-title">Analytics & Status</h2>
+        <h2 class="page-title"><?php echo ($role === 'admin') ? "System Analytics" : "My Classes Analytics"; ?></h2>
         <div class="header-time" id="live-time">
             <?php echo date('l, F j, Y'); ?> - <span></span>
         </div>
@@ -60,7 +92,7 @@ $recent = $recent_stmt->fetchAll(PDO::FETCH_ASSOC);
     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 30px;">
         <?php
         $cards = [
-            ['icon' => '👨‍🎓', 'label' => 'Total Students', 'value' => $count_students, 'color' => 'var(--primary)'],
+            ['icon' => '👨‍🎓', 'label' => ($role==='admin' ? 'Total Students' : 'My Students'), 'value' => $count_students, 'color' => 'var(--primary)'],
             ['icon' => '✅', 'label' => 'Present Today', 'value' => $present_today, 'color' => 'var(--success)'],
             ['icon' => '⏱️', 'label' => 'Late Today', 'value' => $late_today, 'color' => 'var(--warning)'],
             ['icon' => '❌', 'label' => 'Absent Today', 'value' => $absent_today, 'color' => 'var(--danger)'],
@@ -94,7 +126,7 @@ $recent = $recent_stmt->fetchAll(PDO::FETCH_ASSOC);
         <!-- Recent Records -->
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h3 style="font-size: 1.1rem; color: var(--text-main);">Recent Activity </h3>
+                <h3 style="font-size: 1.1rem; color: var(--text-main);">Recent Activity</h3>
                 <a href="view_attendance.php" style="font-size: 0.85rem; color: var(--primary); text-decoration: none; font-weight: 600;">View All</a>
             </div>
             <div style="display: flex; flex-direction: column; gap: 10px;">
@@ -110,7 +142,7 @@ $recent = $recent_stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;">
                     <div>
                         <div style="font-weight: 600; font-size: 0.95rem; color: var(--text-main);"><?php echo htmlspecialchars($r['last_name'].', '.$r['first_name']); ?></div>
-                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 3px;"><?php echo date('M d, Y', strtotime($r['attendance_date'])); ?></div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 3px;"><?php echo htmlspecialchars($r['subject_name'] ?? 'General') . " • " . date('M d', strtotime($r['attendance_date'])); ?></div>
                     </div>
                     <div style="font-weight: 700; font-size: 0.85rem; color: <?php echo $status_color; ?>; background: <?php echo $status_color; ?>1A; padding: 5px 12px; border-radius: 20px;">
                         <?php echo $r['status']; ?>
@@ -120,16 +152,6 @@ $recent = $recent_stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
         </div>
 
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="card">
-        <h3 style="font-size: 1.1rem; margin-bottom: 15px;">Quick Actions</h3>
-        <div style="display: flex; gap: 15px;">
-            <a href="mark_attendance.php" class="btn btn-primary" style="flex: 1;">📋 Mark Daily Attendance</a>
-            <a href="add_student.php" class="btn btn-secondary" style="flex: 1; border-color: var(--primary); color: var(--primary);">👤 Register New Student</a>
-            <a href="system_logs.php" class="btn btn-secondary" style="flex: 1;">⚙️ View System Logs</a>
-        </div>
     </div>
 
 </div>

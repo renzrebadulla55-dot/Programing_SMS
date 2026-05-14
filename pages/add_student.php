@@ -3,10 +3,29 @@ require_once '../includes/session.php';
 require_once '../config/database.php';
 include '../includes/header.php'; 
 
-// Fetch current students
-$query = "SELECT * FROM students ORDER BY id DESC";
+// Fetch current students grouped by year and section
+$query = "SELECT * FROM students ORDER BY year_level ASC, section ASC, last_name ASC";
 $stmt = $conn->query($query);
-$students = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$all_students = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Group students by Year Level and Section
+$grouped_students = [];
+foreach ($all_students as $s) {
+    $year = $s['year_level'];
+    $section = $s['section'];
+    if (!isset($grouped_students[$year])) {
+        $grouped_students[$year] = [];
+    }
+    if (!isset($grouped_students[$year][$section])) {
+        $grouped_students[$year][$section] = [];
+    }
+    $grouped_students[$year][$section][] = $s;
+}
+
+// Sort sections alphabetically within each year
+foreach ($grouped_students as $year => $sections) {
+    ksort($grouped_students[$year]);
+}
 
 // Calculate the next auto-incrementing ID for the student number counter
 $count_query = "SELECT COUNT(*) as total FROM students";
@@ -118,44 +137,79 @@ $next_counter = str_pad($total_students + 1, 4, '0', STR_PAD_LEFT);
         </div>
 
         <div class="card">
-            <h3 style="color: var(--text-main); margin-bottom: 15px;">Currently Enrolled Students</h3>
-            <table class="big-table">
-                <thead>
-                    <tr>
-                        <th>ID No.</th>
-                        <th>Name</th>
-                        <th>Gender</th>
-                        <th>Year & Section</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if(count($students) > 0): ?>
-                        <?php foreach($students as $s): ?>
-                        <tr>
-                            <td><strong style="color: var(--primary);"><?php echo $s['student_no']; ?></strong></td>
-                            <td>
-                                <strong><?php echo htmlspecialchars($s['last_name'] . ", " . $s['first_name'] . " " . $s['middle_initial']); ?></strong>
-                            </td>
-                            <td><?php echo isset($s['gender']) ? $s['gender'] : '-'; ?></td>
-                            <td>
-                                <span style="background: var(--bg-color); padding: 5px 10px; border-radius: 6px; font-weight: 600; font-size: 0.85rem;">
-                                    <?php 
-                                        $yl = isset($s['year_level']) ? $s['year_level'] : '?';
-                                        echo $yl . "-" . $s['section']; 
-                                    ?>
-                                </span>
-                            </td>
-                            <td>
-                                <a href="edit_student.php?id=<?php echo $s['id']; ?>" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;">Edit</a>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">No students enrolled yet.</td></tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+            <div style="display: flex; flex-direction: column; gap: 20px; margin-bottom: 25px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="color: var(--text-main); margin: 0;">Student List by Section</h3>
+                    <div style="display: flex; gap: 15px; align-items: center;">
+                        <div style="position: relative;">
+                            <input type="text" id="studentSearch" placeholder="Search students..." 
+                                   style="padding: 10px 15px 10px 40px; border-radius: 20px; border: 1px solid var(--border-color); font-size: 0.9rem; width: 300px;"
+                                   onkeyup="filterGroupedStudents()">
+                            <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); opacity: 0.5;">🔍</span>
+                        </div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">Sorted by Year Level & Section</div>
+                    </div>
+                </div>
+
+                <div class="year-filter-container" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="year-btn active" onclick="filterByYear('all', this)" style="padding: 8px 20px; border-radius: 25px; border: 1px solid var(--primary); background: var(--primary); color: white; cursor: pointer; font-weight: 600; transition: all 0.3s ease;">All Students</button>
+                    <button class="year-btn" onclick="filterByYear('1', this)" style="padding: 8px 20px; border-radius: 25px; border: 1px solid var(--border-color); background: white; color: var(--text-main); cursor: pointer; font-weight: 600; transition: all 0.3s ease;">1st Year</button>
+                    <button class="year-btn" onclick="filterByYear('2', this)" style="padding: 8px 20px; border-radius: 25px; border: 1px solid var(--border-color); background: white; color: var(--text-main); cursor: pointer; font-weight: 600; transition: all 0.3s ease;">2nd Year</button>
+                    <button class="year-btn" onclick="filterByYear('3', this)" style="padding: 8px 20px; border-radius: 25px; border: 1px solid var(--border-color); background: white; color: var(--text-main); cursor: pointer; font-weight: 600; transition: all 0.3s ease;">3rd Year</button>
+                    <button class="year-btn" onclick="filterByYear('4', this)" style="padding: 8px 20px; border-radius: 25px; border: 1px solid var(--border-color); background: white; color: var(--text-main); cursor: pointer; font-weight: 600; transition: all 0.3s ease;">4th Year</button>
+                </div>
+            </div>
+
+            <?php if(count($grouped_students) > 0): ?>
+                <?php foreach($grouped_students as $year => $sections): ?>
+                    <div class="year-group" data-year="<?php echo $year; ?>" style="margin-bottom: 30px;">
+                        <div style="background: var(--primary); color: white; padding: 10px 20px; border-radius: 8px; font-weight: 700; margin-bottom: 15px; display: inline-block;">
+                            YEAR LEVEL: <?php echo $year; ?>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)); gap: 20px;">
+                            <?php foreach($sections as $sec => $students): ?>
+                                <div class="section-card" data-section="<?php echo $sec; ?>" style="background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; border-left: 5px solid var(--primary); transition: all 0.3s ease;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;">
+                                        <h4 style="margin: 0; color: var(--text-main);">Section <?php echo $sec; ?></h4>
+                                        <span style="background: rgba(79, 70, 229, 0.1); color: var(--primary); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">
+                                            <span class="sec-count"><?php echo count($students); ?></span> Students
+                                        </span>
+                                    </div>
+                                    <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                                        <thead>
+                                            <tr style="text-align: left; color: var(--text-muted);">
+                                                <th style="padding: 5px;">ID No.</th>
+                                                <th style="padding: 5px;">Last Name</th>
+                                                <th style="padding: 5px;">M.I.</th>
+                                                <th style="padding: 5px;">First Name</th>
+                                                <th style="padding: 5px;">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="student-tbody">
+                                            <?php foreach($students as $s): ?>
+                                            <tr class="student-row" data-name="<?php echo strtolower($s['last_name'] . ' ' . $s['first_name']); ?>" style="border-top: 1px solid rgba(0,0,0,0.03);">
+                                                <td style="padding: 8px 5px; font-weight: 600; color: var(--primary);"><?php echo $s['student_no']; ?></td>
+                                                <td style="padding: 8px 5px; font-weight: 600;"><?php echo htmlspecialchars($s['last_name']); ?></td>
+                                                <td style="padding: 8px 5px; font-weight: 600;"><?php echo htmlspecialchars($s['middle_initial']); ?></td>
+                                                <td style="padding: 8px 5px; font-weight: 600;"><?php echo htmlspecialchars($s['first_name']); ?></td>
+                                                <td style="padding: 8px 5px;">
+                                                    <a href="edit_student.php?id=<?php echo $s['id']; ?>" style="color: var(--text-muted); text-decoration: none; font-size: 1.1rem; opacity: 0.7; transition: opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7" title="Edit">
+                                                        ✎
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div style="text-align: center; color: var(--text-muted); padding: 40px;">No students enrolled yet.</div>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -168,6 +222,58 @@ $next_counter = str_pad($total_students + 1, 4, '0', STR_PAD_LEFT);
         const studentNo = year + "-" + nextCounter;
         document.getElementById('display_student_no').value = studentNo;
         document.getElementById('real_student_no').value = studentNo;
+    }
+
+    function filterByYear(year, btn) {
+        // Update button styles
+        document.querySelectorAll('.year-btn').forEach(b => {
+            b.style.background = 'white';
+            b.style.color = 'var(--text-main)';
+            b.style.borderColor = 'var(--border-color)';
+        });
+        btn.style.background = 'var(--primary)';
+        btn.style.color = 'white';
+        btn.style.borderColor = 'var(--primary)';
+
+        // Filter year groups
+        const groups = document.querySelectorAll('.year-group');
+        groups.forEach(group => {
+            if (year === 'all' || group.getAttribute('data-year') === year) {
+                group.style.display = "";
+            } else {
+                group.style.display = "none";
+            }
+        });
+    }
+
+    function filterGroupedStudents() {
+        const input = document.getElementById('studentSearch').value.toLowerCase();
+        const sectionCards = document.querySelectorAll('.section-card');
+
+        sectionCards.forEach(card => {
+            const rows = card.querySelectorAll('.student-row');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const name = row.getAttribute('data-name');
+                if (name.includes(input)) {
+                    row.style.display = "";
+                    visibleCount++;
+                } else {
+                    row.style.display = "none";
+                }
+            });
+
+            // Update visible student count for the section
+            card.querySelector('.sec-count').textContent = visibleCount;
+
+            // Hide the entire section card if no students match
+            if (visibleCount === 0) {
+                card.style.display = "none";
+            } else {
+                card.style.display = "";
+            }
+        });
     }
 
     document.addEventListener('DOMContentLoaded', updateStudentNo);

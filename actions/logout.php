@@ -1,13 +1,12 @@
 <?php
 session_start();
+require_once '../config/database.php';
 
-// Unset all session variables
-$_SESSION = array();
+if (isset($_SESSION['username'])) {
+    log_system_action($conn, "Securely logged out", $_SESSION['username']);
+}
 
-// Destroy the session
 session_destroy();
-
-// Redirect back to the login page
-header("Location: ../pages/login.php");
+header("Location: ../pages/login.php?logout=success");
 exit();
 ?>

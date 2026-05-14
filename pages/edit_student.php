@@ -65,9 +65,7 @@ $student = $stmt->fetch(PDO::FETCH_ASSOC);
                     <label>Section</label>
                     <select name="section" required>
                         <?php 
-                        $all_secs = array_merge(range('A', 'Z'));
-                        foreach(range('A', 'Z') as $c) $all_secs[] = "A".$c;
-                        foreach($all_secs as $sec) {
+                        foreach(['A', 'B', 'C', 'D'] as $sec) {
                             $sel = ($student['section'] == $sec) ? 'selected' : '';
                             echo "<option value='$sec' $sel>$sec</option>";
                         }
