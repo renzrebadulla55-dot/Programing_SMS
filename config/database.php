@@ -1,5 +1,5 @@
 <?php
-$host = "localhost";
+$host = "127.0.0.1;port=3307";
 $db_name = "student_monitoring_db";
 $username = "root";
 $password = "";
