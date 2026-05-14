@@ -3,16 +3,10 @@ require_once '../includes/session.php';
 require_once '../config/database.php';
 include '../includes/header.php'; 
 
-<<<<<<< HEAD
+$today = date('Y-m-d');
+
 $query = "SELECT * FROM students ORDER BY last_name ASC";
 $stmt = $conn->query($query);
-=======
-$today = date('Y-m-d');
-$today_label = date('F d, Y');
-
-// Fetch all students
-$stmt = $conn->query("SELECT * FROM students ORDER BY last_name ASC");
->>>>>>> 915aea506c89d11fadd177121a29ad1f57cdbecc
 $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Check existing records for today
@@ -24,44 +18,63 @@ foreach ($ex_stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
 }
 
 $already_submitted = count($existing) > 0;
-$avatar_colors = ['#5046e5','#0ea5e9','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899'];
 ?>
-
-<<<<<<< HEAD
-<style>
-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); }
-th { background-color: #F8FAFC; color: var(--primary); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; }
-.radio-group { display: flex; gap: 15px; }
-.radio-label { display: flex; align-items: center; gap: 5px; font-size: 0.9rem; cursor: pointer; }
-</style>
 
 <div class="page-header">
     <h2 class="page-title">Mark Attendance</h2>
-    <p style="color: var(--text-muted); font-size: 0.9rem;">Recording for: <strong><?php echo date('F d, Y'); ?></strong></p>
+    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 5px;">Recording for: <strong><?php echo date('F d, Y'); ?></strong></p>
 </div>
 
-<div class="card">
-    <form action="../actions/save_attendance.php" method="POST">
-        <table>
+<div class="card" style="margin-bottom: 30px;">
+    
+    <?php if($already_submitted): ?>
+        <div style="background: #e0f2fe; color: #0369a1; padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 0.9rem; font-weight: 600;">
+            ℹ️ Attendance for today has already been submitted. You are currently editing existing records.
+        </div>
+    <?php endif; ?>
+
+    <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+        <div style="background: #F1F5F9; padding: 8px 15px; border-radius: 8px; font-weight: 600; color: var(--success);">Present: <span id="cnt-present">0</span></div>
+        <div style="background: #F1F5F9; padding: 8px 15px; border-radius: 8px; font-weight: 600; color: var(--warning);">Late: <span id="cnt-late">0</span></div>
+        <div style="background: #F1F5F9; padding: 8px 15px; border-radius: 8px; font-weight: 600; color: var(--danger);">Absent: <span id="cnt-absent">0</span></div>
+        <div style="background: #F1F5F9; padding: 8px 15px; border-radius: 8px; font-weight: 600; color: var(--text-muted);">Excused: <span id="cnt-excused">0</span></div>
+    </div>
+
+    <form id="attendanceForm" action="../actions/save_attendance.php" method="POST">
+        <table class="big-table">
             <thead>
                 <tr>
                     <th>Student Name</th>
-                    <th>Section</th>
+                    <th>Year & Section</th>
                     <th>Attendance Status</th>
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($students as $s): ?>
+                <?php foreach ($students as $s): 
+                    // Determine pre-selected status
+                    $current_status = isset($existing[$s['id']]) ? $existing[$s['id']] : 'Present';
+                ?>
                 <tr>
-                    <td><strong><?php echo $s['last_name'] . ", " . $s['first_name']; ?></strong></td>
-                    <td><?php echo $s['section']; ?></td>
+                    <td><strong><?php echo $s['last_name'] . ", " . $s['first_name'] . " " . (isset($s['middle_initial']) ? $s['middle_initial'] : ''); ?></strong></td>
                     <td>
-                        <div class="radio-group">
-                            <label class="radio-label" style="color: var(--success);"><input type="radio" name="attendance[<?php echo $s['id']; ?>]" value="Present" checked> Present</label>
-                            <label class="radio-label" style="color: var(--warning);"><input type="radio" name="attendance[<?php echo $s['id']; ?>]" value="Late"> Late</label>
-                            <label class="radio-label" style="color: var(--danger);"><input type="radio" name="attendance[<?php echo $s['id']; ?>]" value="Absent"> Absent</label>
-                            <label class="radio-label" style="color: var(--text-muted);"><input type="radio" name="attendance[<?php echo $s['id']; ?>]" value="Excused"> Excused</label>
+                        <span style="background: var(--bg-color); padding: 5px 10px; border-radius: 6px; font-weight: 600; font-size: 0.85rem;">
+                            <?php echo (isset($s['year_level']) ? $s['year_level'] : '1') . "-" . $s['section']; ?>
+                        </span>
+                    </td>
+                    <td>
+                        <div class="radio-group" style="display: flex; gap: 20px;">
+                            <label class="radio-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; color: var(--success); font-weight: 600;">
+                                <input type="radio" style="transform: scale(1.3); cursor: pointer;" name="attendance[<?php echo $s['id']; ?>]" value="Present" <?php echo ($current_status == 'Present') ? 'checked' : ''; ?>> Present
+                            </label>
+                            <label class="radio-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; color: var(--warning); font-weight: 600;">
+                                <input type="radio" style="transform: scale(1.3); cursor: pointer;" name="attendance[<?php echo $s['id']; ?>]" value="Late" <?php echo ($current_status == 'Late') ? 'checked' : ''; ?>> Late
+                            </label>
+                            <label class="radio-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; color: var(--danger); font-weight: 600;">
+                                <input type="radio" style="transform: scale(1.3); cursor: pointer;" name="attendance[<?php echo $s['id']; ?>]" value="Absent" <?php echo ($current_status == 'Absent') ? 'checked' : ''; ?>> Absent
+                            </label>
+                            <label class="radio-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; color: var(--text-muted); font-weight: 600;">
+                                <input type="radio" style="transform: scale(1.3); cursor: pointer;" name="attendance[<?php echo $s['id']; ?>]" value="Excused" <?php echo ($current_status == 'Excused') ? 'checked' : ''; ?>> Excused
+                            </label>
                         </div>
                     </td>
                 </tr>
@@ -69,127 +82,8 @@ th { background-color: #F8FAFC; color: var(--primary); font-weight: 600; font-si
             </tbody>
         </table>
         
-        <div style="margin-top: 25px;">
-            <button type="submit" class="btn btn-primary">Submit Daily Attendance</button>
-=======
-<div class="container">
-
-    <!-- Header -->
-    <div class="att-page-header">
-        <div>
-            <h2>Mark Attendance</h2>
-            <p>Record today's attendance for all enrolled students.</p>
-        </div>
-        <span class="date-pill"><?php echo $today_label; ?></span>
-    </div>
-
-    <?php if (isset($_GET['success'])): ?>
-    <div class="success-box">✔ Attendance saved successfully for <?php echo $today_label; ?>!</div>
-    <?php endif; ?>
-
-    <?php if ($already_submitted): ?>
-    <div class="already-notice">
-         Attendance for today has already been submitted. You can still update records below.
-    </div>
-    <?php endif; ?>
-
-    <!-- Live Summary -->
-    <div class="att-summary">
-        <div class="att-stat s-total">
-            <span class="sval"><?php echo count($students); ?></span>
-            <span class="slabel">Total</span>
-        </div>
-        <div class="att-stat s-present">
-            <span class="sval" id="cnt-present">0</span>
-            <span class="slabel">Present</span>
-        </div>
-        <div class="att-stat s-late">
-            <span class="sval" id="cnt-late">0</span>
-            <span class="slabel">Late</span>
-        </div>
-        <div class="att-stat s-absent">
-            <span class="sval" id="cnt-absent">0</span>
-            <span class="slabel">Absent</span>
-        </div>
-    </div>
-
-    <!-- Attendance Form -->
-    <form action="../actions/save_attendance.php" method="POST" id="attendanceForm">
-        <div class="card" style="padding:0;overflow:hidden;">
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width:44px;">#</th>
-                        <th>Student</th>
-                        <th>Student No.</th>
-                        <th>Section</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($students as $i => $s):
-                        $sid     = $s['id'];
-                        $initials = strtoupper(substr($s['first_name'],0,1).substr($s['last_name'],0,1));
-                        $color   = $avatar_colors[$i % count($avatar_colors)];
-                        $current = $existing[$sid] ?? 'Present';
-                    ?>
-                    <tr>
-                        <td style="color:var(--text-muted);font-size:12px;"><?php echo $i + 1; ?></td>
-                        <td>
-                            <div class="s-cell">
-                                <div class="s-avatar-sm" style="background:<?php echo $color; ?>">
-                                    <?php echo $initials; ?>
-                                </div>
-                                <div>
-                                    <div style="font-size:13px;font-weight:600;">
-                                        <?php echo htmlspecialchars($s['last_name'].', '.$s['first_name']); ?>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                        <td style="color:var(--text-muted);font-size:12px;"><?php echo htmlspecialchars($s['student_no']); ?></td>
-                        <td style="font-size:12px;"><?php echo htmlspecialchars($s['section']); ?></td>
-                        <td>
-                            <div class="att-options">
-                                <div class="att-radio r-present">
-                                    <input type="radio" name="attendance[<?php echo $sid; ?>]" id="p_<?php echo $sid; ?>" value="Present" <?php echo $current==='Present'?'checked':''; ?>>
-                                    <label for="p_<?php echo $sid; ?>">P</label>
-                                </div>
-                                <div class="att-radio r-late">
-                                    <input type="radio" name="attendance[<?php echo $sid; ?>]" id="l_<?php echo $sid; ?>" value="Late" <?php echo $current==='Late'?'checked':''; ?>>
-                                    <label for="l_<?php echo $sid; ?>">L</label>
-                                </div>
-                                <div class="att-radio r-absent">
-                                    <input type="radio" name="attendance[<?php echo $sid; ?>]" id="a_<?php echo $sid; ?>" value="Absent" <?php echo $current==='Absent'?'checked':''; ?>>
-                                    <label for="a_<?php echo $sid; ?>">A</label>
-                                </div>
-                                <div class="att-radio r-excused">
-                                    <input type="radio" name="attendance[<?php echo $sid; ?>]" id="e_<?php echo $sid; ?>" value="Excused" <?php echo $current==='Excused'?'checked':''; ?>>
-                                    <label for="e_<?php echo $sid; ?>">E</label>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Submit Bar -->
-        <div class="submit-bar">
-            <p class="legend">
-                <strong>P</strong> = Present &nbsp;·&nbsp;
-                <strong>L</strong> = Late &nbsp;·&nbsp;
-                <strong>A</strong> = Absent &nbsp;·&nbsp;
-                <strong>E</strong> = Excused
-            </p>
-            <div style="display:flex;gap:10px;">
-                <a href="dashboard.php" class="btn btn-secondary">Cancel</a>
-                <button type="submit" class="btn btn-primary">
-                    <?php echo $already_submitted ? 'Update Attendance' : 'Submit Attendance'; ?>
-                </button>
-            </div>
->>>>>>> 915aea506c89d11fadd177121a29ad1f57cdbecc
+        <div style="margin-top: 30px;">
+            <button type="submit" class="btn btn-primary"><?php echo $already_submitted ? "Update Attendance" : "Save Attendance Records"; ?></button>
         </div>
     </form>
 
@@ -197,17 +91,21 @@ th { background-color: #F8FAFC; color: var(--primary); font-weight: 600; font-si
 
 <script>
 function updateCounts() {
-    let present = 0, late = 0, absent = 0;
+    let present = 0, late = 0, absent = 0, excused = 0;
     document.querySelectorAll('input[type="radio"]:checked').forEach(r => {
         if (r.value === 'Present') present++;
         else if (r.value === 'Late') late++;
         else if (r.value === 'Absent') absent++;
+        else if (r.value === 'Excused') excused++;
     });
     document.getElementById('cnt-present').textContent = present;
     document.getElementById('cnt-late').textContent = late;
     document.getElementById('cnt-absent').textContent = absent;
+    document.getElementById('cnt-excused').textContent = excused;
 }
+
 document.getElementById('attendanceForm').addEventListener('change', updateCounts);
+// Run once on load to set initial counts
 updateCounts();
 </script>
 

@@ -1,29 +1,29 @@
 <?php
+require_once '../includes/session.php';
 require_once '../config/database.php';
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['attendance'])) {
-    $date = date('Y-m-d');
-
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $attendance = $_POST['attendance'];
+    $today = date('Y-m-d');
+    
     try {
-        // This SQL will INSERT if new, or UPDATE if the student already has a record today
-        $sql = "INSERT INTO attendance (student_id, status, attendance_date) 
-                VALUES (:s_id, :status, :date)
-                ON DUPLICATE KEY UPDATE status = VALUES(status)";
+        $conn->beginTransaction();
         
-        $stmt = $conn->prepare($sql);
-
-        foreach ($_POST['attendance'] as $student_id => $status) {
-            $stmt->execute([
-                ':s_id'   => $student_id,
-                ':status' => $status,
-                ':date'   => $date
-            ]);
+        $stmt = $conn->prepare("INSERT INTO attendance (student_id, attendance_date, status) VALUES (?, ?, ?) 
+                                ON DUPLICATE KEY UPDATE status = ?");
+                                
+        foreach ($attendance as $student_id => $status) {
+            $stmt->execute([$student_id, $today, $status, $status]);
         }
-
-        header("Location: ../pages/view_attendance.php?success=1");
-        exit();
-
-    } catch (PDOException $e) {
-        die("Database Error: " . $e->getMessage());
+        
+        $conn->commit();
+        
+        log_system_action($conn, "Saved attendance records for " . count($attendance) . " students on $today", $_SESSION['username']);
+        
+        header("Location: ../pages/dashboard.php?attendance_saved=1");
+    } catch(PDOException $e) {
+        $conn->rollBack();
+        die("Error saving attendance: " . $e->getMessage());
     }
 }
+?>

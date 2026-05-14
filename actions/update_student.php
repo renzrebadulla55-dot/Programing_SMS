@@ -4,17 +4,24 @@ require_once '../config/database.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $id = $_POST['id'];
-    $s_no = $_POST['student_no'];
-    $fn = $_POST['first_name'];
-    $ln = $_POST['last_name'];
-    $sec = $_POST['section'];
+    $student_no = $_POST['student_no'];
+    $first_name = $_POST['first_name'];
+    $last_name = $_POST['last_name'];
+    $section = $_POST['section'];
+    $gender = isset($_POST['gender']) ? $_POST['gender'] : 'Male';
+    $middle_initial = isset($_POST['middle_initial']) ? $_POST['middle_initial'] : '';
+    $year_level = isset($_POST['year_level']) ? $_POST['year_level'] : '1';
+    $enrollment_status = isset($_POST['enrollment_status']) ? $_POST['enrollment_status'] : 'Regular';
 
-    $sql = "UPDATE students SET student_no = ?, first_name = ?, last_name = ?, section = ? WHERE id = ?";
-    $stmt = $conn->prepare($sql);
-    
-    if ($stmt->execute([$s_no, $fn, $ln, $sec, $id])) {
-        header("Location: ../pages/add_student.php?updated=1");
-    } else {
-        echo "Error updating record.";
+    try {
+        $stmt = $conn->prepare("UPDATE students SET first_name=?, last_name=?, section=?, gender=?, middle_initial=?, year_level=?, enrollment_status=? WHERE id=?");
+        $stmt->execute([$first_name, $last_name, $section, $gender, $middle_initial, $year_level, $enrollment_status, $id]);
+        
+        log_system_action($conn, "Updated student record: $last_name, $first_name ($student_no)", $_SESSION['username']);
+        
+        header("Location: ../pages/add_student.php");
+    } catch(PDOException $e) {
+        die("Error: " . $e->getMessage());
     }
 }
+?>
