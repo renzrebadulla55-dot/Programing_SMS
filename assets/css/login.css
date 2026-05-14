@@ -1,42 +1,12 @@
 /* Login Page Specific Styles */
-.login-body {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    background: url('https://i.pinimg.com/1200x/42/32/af/4232afb89f85fba12c9f6e91de845477.jpg') no-repeat center center/cover;
-    background-attachment: fixed;
-    background-size: cover;
-}
-
 .login-card {
     width: 100%;
     max-width: 400px;
     padding: 2rem;
-    background: rgba(255, 255, 255, 0.2); /* Transparent white */
     border-radius: 15px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25); /* Soft shadow */
-    backdrop-filter: blur(10px); /* Blur effect for glassmorphism */
-    -webkit-backdrop-filter: blur(10px); /* Safari support */
-    border: 1px solid rgba(255, 255, 255, 0.18); /* Subtle border */
+    -webkit-backdrop-filter: blur(15px); /* Safari support for updated blur */
     color: var(--text-main);
-}
-
-.login-header {
-    text-align: center;
-    margin-bottom: 2rem;    
-}
-
-.login-header h2 {
-    margin: 0;
-    font-size: 1.8rem;
-    font-weight: bold;
-    color: var(--text-main);
-}
-
-.login-header p {
-    color: var(--text-muted);
-    font-size: 0.9rem;
 }
 
 .error-box {
@@ -91,9 +61,3 @@ button.btn-primary:hover {
     box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
 }
 
-p.footer-text {
-    text-align: center;
-    font-size: 0.8rem;
-    color: #999;
-    margin-top: 20px;
-}

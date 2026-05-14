@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .dashboard-stats {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -33,9 +34,33 @@
 
 .stat-desc {
     font-size: 0.8rem;
-    color: var(--text-muted);
+=======
+/* ── Dashboard Page ── */
+
+body {
+    background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+    background-attachment: fixed;
 }
 
+.dash-header {
+    margin-bottom: 22px;
+}
+
+.dash-header h2 {
+    font-family: 'Sora', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.dash-header p {
+    font-size: 13px;
+>>>>>>> 915aea506c89d11fadd177121a29ad1f57cdbecc
+    color: var(--text-muted);
+    margin-top: 3px;
+}
+
+<<<<<<< HEAD
 /* Dashboard main grid layout */
 .dashboard-grid {
     display: grid;
@@ -155,10 +180,325 @@
 }
 
 .action-box {
+=======
+
+/* ── Stat Grid ── */
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 18px;
+    border: 0.5px solid var(--border);
+    border-top: 3px solid transparent;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+.stat-card.c-primary {
+    border-top-color: var(--primary);
+}
+
+.stat-card.c-success {
+    border-top-color: var(--success);
+}
+
+.stat-card.c-warning {
+    border-top-color: var(--warning);
+}
+
+.stat-card.c-danger {
+    border-top-color: var(--danger);
+}
+
+.stat-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    margin-bottom: 12px;
+}
+
+.stat-card.c-primary .stat-icon {
+    background: rgba(80, 70, 229, 0.1);
+}
+
+.stat-card.c-success .stat-icon {
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.stat-card.c-warning .stat-icon {
+    background: rgba(245, 158, 11, 0.1);
+}
+
+.stat-card.c-danger .stat-icon {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    font-family: 'Sora', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 4px 0 2px;
+    line-height: 1;
+}
+
+.stat-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+/* ── Chart Card ── */
+.chart-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 22px;
+    border: 0.5px solid var(--border);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+}
+
+.chart-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.chart-card-header h3 {
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.chart-pill {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: rgba(80, 70, 229, 0.1);
+    color: var(--primary);
+}
+
+/* ── Dash Header ── */
+.dash-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+}
+
+.dash-header-left h2 {
+    font-family: 'Sora', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 3px;
+}
+
+.dash-header-left p {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.dash-header-left p strong {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.dash-date-badge {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--primary);
+    background: rgba(80, 70, 229, 0.08);
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 0.5px solid rgba(80, 70, 229, 0.15);
+}
+
+
+/* ── Dashboard Page ── */
+
+.dash-header {
+    margin-bottom: 22px;
+}
+
+.dash-header h2 {
+    font-family: 'Sora', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.dash-header p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 3px;
+}
+
+
+/* ── Stat Grid ── */
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 18px;
+    border: 0.5px solid var(--border);
+    border-top: none !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+.stat-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    margin-bottom: 12px;
+}
+
+.stat-card.c-primary .stat-icon {
+    background: rgba(80, 70, 229, 0.1);
+}
+
+.stat-card.c-success .stat-icon {
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.stat-card.c-warning .stat-icon {
+    background: rgba(245, 158, 11, 0.1);
+}
+
+.stat-card.c-danger .stat-icon {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    font-family: 'Sora', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 4px 0 2px;
+    line-height: 1;
+}
+
+.stat-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+/* ── Chart Card ── */
+.chart-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 22px;
+    border: 0.5px solid var(--border);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+}
+
+.chart-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.chart-card-header h3 {
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.chart-pill {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: rgba(80, 70, 229, 0.1);
+    color: var(--primary);
+}
+
+/* ── Quick Actions ── */
+.quick-actions-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 22px;
+    border: 0.5px solid var(--border);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.quick-actions-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.quick-actions-card h3 {
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 4px;
+}
+
+.quick-actions-card p {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+}
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.action-btn {
+>>>>>>> 915aea506c89d11fadd177121a29ad1f57cdbecc
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+<<<<<<< HEAD
     padding: 20px;
     border: 1px dashed var(--border-color);
     border-radius: 8px;
@@ -173,4 +513,60 @@
     background: #F1F5F9;
     border-color: var(--accent);
     color: var(--accent);
+=======
+    gap: 10px;
+    padding: 22px 16px;
+    border-radius: 10px;
+    border: 2px solid var(--border);
+    background: var(--card-bg);
+    text-decoration: none;
+    color: var(--text-main);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: color 0.3s ease,
+        background 0.3s ease,
+        border-color 0.3s ease,
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
+    --action-color: #5046e5;
+    --action-bg: rgba(80, 70, 229, 0.1);
+}
+
+.action-btn:hover {
+    transform: translateY(-4px);
+    color: #fff;
+    background: var(--action-color);
+    border-color: var(--action-color);
+    box-shadow: 0 12px 24px color-mix(in srgb, var(--action-color) 20%, transparent);
+}
+
+.action-icon-wrap {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+    transition: background 0.3s ease, transform 0.3s ease;
+    background: var(--action-bg);
+}
+
+.action-btn:hover .action-icon-wrap {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.15);
+}
+
+.action-btn svg {
+    color: var(--action-color);
+    transition: color 0.3s ease;
+}
+
+.action-btn:hover svg {
+    color: #fff;
+>>>>>>> 915aea506c89d11fadd177121a29ad1f57cdbecc
 }
